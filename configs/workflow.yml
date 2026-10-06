@@ -1,0 +1,13 @@
+llms:
+  reasoning_llm:
+    _type: nim
+    model_name: nvidia/nemotron-3-super-120b-a12b
+    temperature: 0.2
+    max_tokens: 4096
+    chat_template_kwargs:
+      enable_thinking: false
+workflow:
+  _type: design_binders
+  llm_name: reasoning_llm
+  backbones: 3
+  seqs_per_backbone: 3
