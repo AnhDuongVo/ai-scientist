@@ -19,6 +19,12 @@ flowchart LR
     R --> O[Report for a scientist<br/>with evidence and caveats]
 ```
 
+## Demo
+
+![ai-scientist demo](docs/demo.gif)
+
+The interactive demo running on the simulator: changing the target, the seed and the number of candidates updates the ranking. The scores are placeholders. The video is on [anhduongvo.github.io](https://anhduongvo.github.io/projects/clinical-agentic-ai/).
+
 ## Why this design
 
 - **Four chained steps.** The agent chains four steps (literature, backbones, sequences,
