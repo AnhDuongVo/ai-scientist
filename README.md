@@ -21,14 +21,14 @@ flowchart LR
 
 ## Why this design
 
-- **A real pipeline, not one model call.** The agent chains four steps (literature, backbones, sequences,
+- **Four chained steps.** The agent chains four steps (literature, backbones, sequences,
   folding) and turns their outputs into one ranked, traceable report.
 - **Simulator by default.** `SimulatedBioNeMo` returns deterministic, well-formed outputs for every step, so
   the whole pipeline, the ranking logic and the report are covered by offline tests and a key-free demo.
 - **Real backend behind one flag.** `--real-bio` switches to the live NIM client, which handles the async
   `202` / `nvcf-reqid` polling that the hosted biology NIMs use for long jobs, and works against a self-hosted
   NIM through `BIONEMO_BASE_URL`.
-- **Honest scoring.** The composite score is a transparent heuristic for ranking a screen, stated in the
+- **Scoring.** The composite score is a simple, documented heuristic for ranking a screen; it is stated in the
   report, and every candidate is a hypothesis for wet-lab testing.
 - **Cited reasoning.** The literature brief may only cite abstracts that were actually retrieved;
   hallucinated citation ids are dropped.
@@ -114,6 +114,8 @@ src/ai_scientist/
   cli.py         `sci`
 tests/           offline tests (simulated LLM and BioNeMo), deterministic
 ```
+
+> **Design note.** The small OpenAI-compatible client (`llm.py`) and settings (`config.py`) are intentionally vendored rather than shared as a package, so each example is self-contained and runs with a single `pip install`. The same module appears in the sibling projects by design. `bionemo.py` is the same BioNeMo client that powers [mcp-bionemo](https://github.com/AnhDuongVo/mcp-bionemo), vendored here for the same reason.
 
 ## Development
 

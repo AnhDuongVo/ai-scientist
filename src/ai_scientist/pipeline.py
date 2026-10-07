@@ -4,7 +4,7 @@
       -> sequences (ProteinMPNN) -> co-fold and score the complex (Boltz-2) -> rank -> report for a scientist
 
 This orchestrates NVIDIA BioNeMo NIMs the way the Protein Binder Design blueprint does. The scientific
-scoring is deliberately simple and explained; the point is the orchestration and a traceable, ranked report,
+scoring is deliberately simple and documented; the output is a traceable, ranked report,
 not a new method. Everything runs offline with SimulatedBioNeMo so the pipeline and ranking are testable.
 """
 
