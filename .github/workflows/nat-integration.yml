@@ -1,5 +1,7 @@
 name: NAT integration
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 jobs:
@@ -11,4 +13,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[dev,nat]"
-      - run: pytest -q tests/test_regressions.py -k nat_plugin
+      - name: Require installed NAT dependency
+        run: python -c "import nat; import ai_scientist.nat_plugin.register"
+      - name: Execute NAT registration and simulated workflow
+        run: pytest -q tests/test_regressions.py -k nat_plugin

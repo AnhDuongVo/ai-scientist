@@ -67,7 +67,7 @@ flowchart LR
 
 ![ai-scientist demo](docs/demo.gif)
 
-The interactive demo running on the simulator: changing the target, the seed and the number of candidates updates the ranking. The scores are placeholders. The video is on [anhduongvo.github.io](https://anhduongvo.github.io/projects/clinical-agentic-ai/).
+The interactive demo running on the simulator: changing the seed updates the protein-only ranking. Confidence and MPNN inputs are explicitly simulated; no affinity term is used. The scores are placeholders. The video is on [anhduongvo.github.io](https://anhduongvo.github.io/projects/clinical-agentic-ai/).
 
 ## Why this design
 

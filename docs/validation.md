@@ -35,3 +35,7 @@ RUN_LIVE_NVIDIA=1 BIONEMO_TARGET_JSON=target.json pytest -q tests/test_live_cont
 Set `NGC_API_KEY` or `NVIDIA_API_KEY`, and optionally `BIONEMO_BASE_URL`. Install the relevant live extra first (`.[bio]` for ai-scientist, `.[live]` for mcp-bionemo). The manual workflow requires `NVIDIA_API_KEY` and `BIONEMO_TARGET_JSON` secrets in the `nvidia-integration` environment. It exercises RFdiffusion and ProteinMPNN response contracts, not all scientific endpoints or biological validity.
 
 The request changes follow the [RFdiffusion request schema](https://docs.api.nvidia.com/nim/reference/ipd-rfdiffusion-infer) and [ProteinMPNN chain-selection schema](https://docs.nvidia.com/nim/bionemo/proteinmpnn/latest/endpoints.html), checked 9 October 2026. Runtime behavior remains unverified.
+
+## Re-review follow-up, 10 October 2026
+
+The dedicated NAT job installs `.[dev,nat]`, requires the import, and executes registration plus a simulated workflow on push/PR/manual dispatch. The NAT test passed locally with NAT installed; live contract remains skipped.
