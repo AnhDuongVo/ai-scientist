@@ -26,7 +26,7 @@ def _bio(fake: bool):
 
 def _llm(offline: bool):
     """Real NIM client, or a FakeLLM so `demo` runs with no key when the literature step is also faked."""
-    if offline and not get_settings().api_key:
+    if offline:
         return FakeLLM(
             {
                 "literature_brief": {
@@ -54,6 +54,10 @@ def demo(
     real_lit: bool = typer.Option(False, help="Query Europe PMC (needs network)"),
 ):
     """Run the bundled demo target end to end (BioNeMo faked unless --real-bio)."""
+    if real_bio:
+        raise typer.BadParameter(
+            "The demo target is a placeholder. Use sci design target.json --real-bio with a real scientific target."
+        )
     papers = None if real_lit else []
     llm = _llm(offline=not real_lit)
     report = asyncio.run(run(DEMO_TARGET, llm, _bio(not real_bio), backbones, seqs, papers=papers))
@@ -88,6 +92,17 @@ def search_lit(query: str, limit: int = typer.Option(10)):
 
     for p in search(query, limit):
         console.print(f"{p.citation()}  {p.url}")
+
+
+@app.command()
+def models():
+    """List reasoning-model IDs served by the configured endpoint."""
+    from openai import OpenAI
+
+    settings = get_settings()
+    with OpenAI(base_url=settings.base_url, api_key=settings.require_api_key()) as client:
+        for model_id in sorted(model.id for model in client.models.list().data):
+            console.print(model_id)
 
 
 if __name__ == "__main__":

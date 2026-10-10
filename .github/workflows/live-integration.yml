@@ -1,0 +1,24 @@
+name: Opt-in live BioNeMo contract
+on:
+  workflow_dispatch:
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    environment: nvidia-integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev,bio]"
+      - name: Write supplied real target fixture
+        env:
+          TARGET_JSON: ${{ secrets.BIONEMO_TARGET_JSON }}
+        run: |
+          python -c 'import os,pathlib; pathlib.Path("target.json").write_text(os.environ["TARGET_JSON"])'
+      - name: Live contract test
+        env:
+          RUN_LIVE_NVIDIA: "1"
+          BIONEMO_TARGET_JSON: target.json
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: pytest -q tests/test_live_contract.py

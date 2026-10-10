@@ -9,6 +9,9 @@ class Target(BaseModel):
     name: str
     pdb: str = Field(description="Target structure as a PDB string")
     binder_chain_target: str = Field(default="A", description="Chain id of the target in the PDB")
+    binder_chain: str | None = Field(
+        default=None, description="Explicit generated binder chain; inferred only if unambiguous"
+    )
     contigs: str = Field(description="RFdiffusion contig string, e.g. 'A1-100/0 50-100'")
     hotspot_res: list[str] = Field(default_factory=list, description="e.g. ['A50','A51']")
     target_sequence: str = Field(

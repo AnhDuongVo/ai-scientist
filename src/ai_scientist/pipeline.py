@@ -84,7 +84,21 @@ def design_candidates(
     for b in range(n_backbones):
         backbone = bio.rfdiffusion(target.pdb, target.contigs, target.hotspot_res, random_seed=b)
         pdb = backbone["output_pdb"]
-        designs = parse_mfasta(bio.proteinmpnn(pdb, num_seq_per_target=seqs_per_backbone)["mfasta"])
+        chains = {line[21:22] for line in pdb.splitlines() if line.startswith("ATOM")}
+        generated = chains - {target.binder_chain_target}
+        chain = target.binder_chain
+        if chain is None:
+            if len(generated) != 1:
+                raise ValueError("Cannot identify one binder chain; specify target.binder_chain")
+            chain = next(iter(generated))
+        if chain not in chains or chain == target.binder_chain_target:
+            raise ValueError("Binder chain must exist and differ from the target chain")
+        length = len({line[22:27] for line in pdb.splitlines() if line.startswith("ATOM") and line[21:22] == chain})
+        designs = parse_mfasta(
+            bio.proteinmpnn(pdb, num_seq_per_target=seqs_per_backbone, input_pdb_chains=[chain])["mfasta"]
+        )
+        if not designs or any(len(seq) != length for _, seq in designs):
+            raise ValueError("ProteinMPNN sequence does not map to the selected binder chain")
         for s, (score, seq) in enumerate(designs):
             polymers = [{"id": "A", "molecule_type": "protein", "sequence": seq}]
             if target_seq:

@@ -7,6 +7,7 @@ polls the status endpoint. A `SimulatedBioNeMo` with the same interface backs th
 
 from __future__ import annotations
 
+import hashlib
 import os
 import time
 from dataclasses import dataclass, field
@@ -60,6 +61,8 @@ class NIMBioNeMo:
         resp = self._requests.post(url, headers=self._headers(), json=body, timeout=self.s.timeout)
         if resp.status_code == 202:  # async: poll the status endpoint on the same host as base_url
             rid = resp.headers.get("nvcf-reqid")
+            if not rid:
+                raise ValueError("BioNeMo async response omitted nvcf-reqid")
             host = self.s.base_url.rstrip("/").removesuffix("/v1")
             status_url = f"{host}/v1/status/{rid}"
             deadline = time.time() + self.s.timeout
@@ -91,6 +94,8 @@ class NIMBioNeMo:
         body = {"input_pdb": input_pdb, "contigs": contigs, "diffusion_steps": kw.get("diffusion_steps", 50)}
         if hotspot_res:
             body["hotspot_res"] = hotspot_res
+        if kw.get("random_seed") is not None:
+            body["random_seed"] = kw["random_seed"]
         return self._post("rfdiffusion", body)
 
     def proteinmpnn(self, input_pdb, **kw):
@@ -130,10 +135,18 @@ class SimulatedBioNeMo:
         n = kw.get("num_seq_per_target", 8)
         import random
 
-        rng = random.Random(self.seed + hash(input_pdb) % 100000)
+        digest = int.from_bytes(hashlib.sha256(input_pdb.encode()).digest()[:8], "big")
+        rng = random.Random(self.seed + digest)
+        chains = kw.get("input_pdb_chains")
+        residues = {
+            (line[21:22], line[22:27])
+            for line in input_pdb.splitlines()
+            if line.startswith("ATOM") and (not chains or line[21:22] in chains)
+        }
+        length = len(residues) or 55
         designs, scores = [], []
         for i in range(n):
-            seq = "".join(rng.choice("ACDEFGHIKLMNPQRSTVWY") for _ in range(55))
+            seq = "".join(rng.choice("ACDEFGHIKLMNPQRSTVWY") for _ in range(length))
             score = round(0.8 + 0.4 * rng.random(), 4)  # lower = better (neg-log-prob convention)
             designs.append(f">T=0.1, score={score}, seq={i}\n{seq}")
             scores.append(score)

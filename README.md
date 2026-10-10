@@ -1,5 +1,49 @@
 # ai-scientist
 
+## What this project demonstrates
+
+Demonstrates BioNeMo pipeline orchestration, binder-chain selection and heuristic candidate ranking. Simulator structures and scores have no biological meaning.
+
+## Watch the demo
+
+![Demo](docs/demo.gif)
+
+[Portfolio videos](https://anhduongvo.github.io/projects/clinical-agentic-ai/). Clinical recordings use the separate simplified interactive demo.
+
+## Try it offline
+
+Python 3.11–3.13. In a fresh virtual environment, from this repository:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+sci demo
+pytest -q
+```
+
+## Run with NVIDIA or another configured backend
+
+For real inputs use `sci design target.json`, not the placeholder demo target. Install `.[bio,nat]` as needed. Configure `NGC_API_KEY` or `NVIDIA_API_KEY`, `BIONEMO_BASE_URL`, and reasoning-model settings. Real target structure, sequence, contigs and hotspots are prerequisites. Hosted/self-hosted calls are not runtime-validated here.
+
+Model IDs in `.env.example` and NAT configs are examples, not a current availability guarantee. Check your endpoint before running; the validation below does not include live model execution.
+
+## What is verified
+
+Stable offline seeds, request payloads, explicit binder-only chain design and sequence-length mapping. Ranking is unvalidated; co-fold confidence is not measured binding. The optional NAT integration test needs `pip install -e ".[nat]"`.
+
+| Validation layer | Status |
+|---|---|
+| Unit/regression tests | Executed locally on Python 3.12; see `docs/validation.md` |
+| Mocked/simulated integrations | Executed locally; scope documented in tests |
+| Live hosted endpoints | Not executed; access and appropriate inputs required |
+| Self-hosted GPU endpoints | Not executed |
+| Domain-specific validation | Not completed; synthetic examples only |
+
+See [validation details](docs/validation.md). The architecture and detailed workflows follow.
+
+## Architecture and detailed workflows
+
 **An agent that proposes candidate protein binders for a target and hands a scientist a ranked, cited report.**
 It reads the literature, designs backbones, generates sequences, folds and scores the binder-target complex,
 and ranks the results, orchestrating NVIDIA BioNeMo biology models the way the Protein Binder Design blueprint
@@ -14,7 +58,7 @@ flowchart LR
     T[Target<br/>structure + epitope] --> L[Literature brief<br/>Europe PMC + reasoning model, cited]
     L --> B[RFdiffusion<br/>backbones for the epitope]
     B --> M[ProteinMPNN<br/>sequences per backbone]
-    M --> F[Boltz-2<br/>co-fold complex: confidence + affinity]
+    M --> F[Boltz-2<br/>optional co-fold: confidence]
     F --> R[Composite rank]
     R --> O[Report for a scientist<br/>with evidence and caveats]
 ```
@@ -62,7 +106,7 @@ cp .env.example .env            # set NVIDIA_API_KEY for the reasoning model
 
 sci search-lit "PD-L1 binder design"      # real Europe PMC search (network only, no key)
 sci demo --real-lit                        # real literature brief, simulated BioNeMo
-sci demo --real-bio                        # real BioNeMo design, with an API key or a local NIM
+sci design target.json --real-bio           # requires a real target structure and configured endpoints
 sci design my_target.json --real-bio --real-lit --backbones 8 --seqs 8   # your own target, fully live
 ```
 
@@ -73,7 +117,7 @@ sci design my_target.json --real-bio --real-lit --backbones 8 --seqs 8   # your 
 - Hosted: a key from build.nvidia.com (`NGC_API_KEY`, or `NVIDIA_API_KEY` if that is unset). The client polls
   the hosted biology NIMs' async job endpoint.
 - Self-hosted: run the NIM containers and set `BIONEMO_BASE_URL` (Boltz-2, RFdiffusion and ProteinMPNN each run
-  on their own port; point the URL at the one you call or a gateway).
+  on their own port; the full pipeline needs a gateway exposing all configured model paths).
 
 > The real backend has not been exercised against live endpoints in this repository. The client follows the
 > documented request and polling format; expect to adjust model paths or request fields on first contact, which
@@ -142,3 +186,5 @@ pytest
 ## Licence
 
 Apache-2.0 (see `LICENSE`). BioNeMo models and Europe PMC data are subject to their own terms.
+
+For NAT live execution, configure `target_json` with a real target fixture alongside `use_real_bionemo: true`; the placeholder is simulator-only. Chain IDs that cannot be inferred unambiguously must be supplied as `binder_chain`. Unexpected sequence/chain mappings fail closed.
