@@ -63,9 +63,7 @@ flowchart LR
     R --> O[Report for a scientist<br/>with evidence and caveats]
 ```
 
-## Demo
-
-![ai-scientist demo](docs/demo.gif)
+## Demo details
 
 The interactive demo running on the simulator: changing the seed updates the protein-only ranking. Confidence and MPNN inputs are explicitly simulated; no affinity term is used. The scores are placeholders. The video is on [anhduongvo.github.io](https://anhduongvo.github.io/projects/clinical-agentic-ai/).
 
