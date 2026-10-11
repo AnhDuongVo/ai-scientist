@@ -1,5 +1,13 @@
 # ai-scientist
 
+## Motivation
+
+Exploring protein binder candidates involves several separate steps: reviewing literature, generating backbones, designing sequences and examining structural scores. Connecting these steps and keeping candidate inputs and results traceable is an engineering problem in its own right.
+
+## What the program does
+
+ai-scientist orchestrates a candidate-design workflow around RFdiffusion, ProteinMPNN and Boltz-2, then assembles a ranked report for a scientist to inspect. It includes a reproducible simulator for testing the workflow without model endpoints. The project demonstrates orchestration and candidate comparison; its heuristic ranking and simulated scores do not establish binding or biological effectiveness.
+
 ## What this project demonstrates
 
 Demonstrates BioNeMo pipeline orchestration, binder-chain selection and heuristic candidate ranking. Simulator structures and scores have no biological meaning.
