@@ -28,6 +28,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+demo = ["streamlit>=1.40"]
 # Live BioNeMo and Europe PMC calls
 bio = ["requests>=2.31"]
 # NeMo Agent Toolkit: run, evaluate, profile and serve the workflow

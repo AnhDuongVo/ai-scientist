@@ -39,3 +39,12 @@ The request changes follow the [RFdiffusion request schema](https://docs.api.nvi
 ## Re-review follow-up, 10 October 2026
 
 The dedicated NAT job installs `.[dev,nat]`, requires the import, and executes registration plus a simulated workflow on push/PR/manual dispatch. The NAT test passed locally with NAT installed; live contract remains skipped.
+
+
+## Workflow recording — 13 October 2026
+
+The recording runs this repository’s actual candidate-design orchestration and ranking using SimulatedBioNeMo, rather than the companion app’s standalone ranking function. A placeholder target, contigs, hotspots and design settings are shown. Two backbone calls, two sequence-design calls and six folding calls produce six simulated candidates; viewers inspect a sequence, the recorded stage calls and the assembled research report. No abstracts are retrieved in this offline run. RFdiffusion, ProteinMPNN and Boltz-2 are simulated; no live inference occurs. The placeholder has no target sequence, so folding is binder-only. Structures, sequences and scores have no biological meaning.
+
+The added optional Streamlit AppTest executes the repository pipeline and verifies the resulting output and review behavior. Install `.[demo,dev]` to include it. This does not validate hosted/self-hosted endpoints or domain correctness.
+
+Validation for this change: full local suite **17 passed** and **1 optional integration test skipped**. Ruff checks passed for the interface, fixtures and added regression test. MP4 decoding passed without errors. No live endpoint or domain validation was performed.

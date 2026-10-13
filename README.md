@@ -16,7 +16,7 @@ Demonstrates BioNeMo pipeline orchestration, binder-chain selection and heuristi
 
 ![Demo](docs/demo.gif)
 
-[Portfolio videos](https://anhduongvo.github.io/projects/clinical-agentic-ai/). Clinical recordings use the separate simplified interactive demo.
+[Portfolio videos](https://anhduongvo.github.io/projects/clinical-agentic-ai/). This recording runs the repository workflow interface with explicitly labeled offline fixtures.
 
 ## Try it offline
 
@@ -73,7 +73,16 @@ flowchart LR
 
 ## Demo details
 
-The interactive demo running on the simulator: changing the seed updates the protein-only ranking. Confidence and MPNN inputs are explicitly simulated; no affinity term is used. The scores are placeholders. The video is on [anhduongvo.github.io](https://anhduongvo.github.io/projects/clinical-agentic-ai/).
+The recording runs this repository’s actual candidate-design orchestration and ranking using SimulatedBioNeMo, rather than the companion app’s standalone ranking function. A placeholder target, contigs, hotspots and design settings are shown. Two backbone calls, two sequence-design calls and six folding calls produce six simulated candidates; viewers inspect a sequence, the recorded stage calls and the assembled research report. No abstracts are retrieved in this offline run. RFdiffusion, ProteinMPNN and Boltz-2 are simulated; no live inference occurs. The placeholder has no target sequence, so folding is binder-only. Structures, sequences and scores have no biological meaning.
+
+Run the same interface without credentials:
+
+```bash
+python -m pip install -e ".[demo]"
+streamlit run examples/workflow.py --theme.base light
+```
+
+For the interface regression check, install `.[demo,dev]` and run `pytest -q`. Previous media are preserved in `old-videos/2026-10-13-before-workflows/`.
 
 ## Why this design
 
