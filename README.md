@@ -10,7 +10,7 @@ ai-scientist orchestrates a candidate-design workflow around RFdiffusion, Protei
 
 ## What this project demonstrates
 
-Demonstrates BioNeMo pipeline orchestration, binder-chain selection and heuristic candidate ranking. Simulator structures and scores have no biological meaning.
+Demonstrates protein-design pipeline orchestration, binder-chain selection and heuristic candidate ranking. Simulator structures and scores have no biological meaning.
 
 ## Watch the demo
 
@@ -30,7 +30,7 @@ sci demo
 pytest -q
 ```
 
-## Run with NVIDIA or another configured backend
+## Run with a configured model backend
 
 For real inputs use `sci design target.json`, not the placeholder demo target. Install `.[bio,nat]` as needed. Configure `NGC_API_KEY` or `NVIDIA_API_KEY`, `BIONEMO_BASE_URL`, and reasoning-model settings. Real target structure, sequence, contigs and hotspots are prerequisites. Hosted/self-hosted calls are not runtime-validated here.
 
@@ -54,11 +54,10 @@ See [validation details](docs/validation.md). The architecture and detailed work
 
 **An agent that proposes candidate protein binders for a target and hands a scientist a ranked, cited report.**
 It reads the literature, designs backbones, generates sequences, folds and scores the binder-target complex,
-and ranks the results, orchestrating NVIDIA BioNeMo biology models the way the Protein Binder Design blueprint
-does.
+and ranks the results, orchestrating established protein-design models in a standard binder-design sequence.
 
 It runs end to end with a **built-in simulator** (no GPU, no key, no network), so the orchestration, ranking
-and report are fully testable offline. Point it at the **real BioNeMo NIMs** (hosted or self-hosted) with one
+and report are fully testable offline. Point it at the **real model endpoints** (hosted or self-hosted) with one
 flag when you have access.
 
 ```mermaid
@@ -73,7 +72,7 @@ flowchart LR
 
 ## Demo details
 
-The recording runs this repository’s actual candidate-design orchestration and ranking using SimulatedBioNeMo, rather than the companion app’s standalone ranking function. A placeholder target, contigs, hotspots and design settings are shown. Two backbone calls, two sequence-design calls and six folding calls produce six simulated candidates; viewers inspect a sequence, the recorded stage calls and the assembled research report. No abstracts are retrieved in this offline run. RFdiffusion, ProteinMPNN and Boltz-2 are simulated; no live inference occurs. The placeholder has no target sequence, so folding is binder-only. Structures, sequences and scores have no biological meaning.
+The recording runs this repository’s actual candidate-design orchestration and ranking using its offline simulator, rather than the companion app’s standalone ranking function. A placeholder target, contigs, hotspots and design settings are shown. Two backbone calls, two sequence-design calls and six folding calls produce six simulated candidates; viewers inspect a sequence, the recorded stage calls and the assembled research report. No abstracts are retrieved in this offline run. RFdiffusion, ProteinMPNN and Boltz-2 are simulated; no live inference occurs. The placeholder has no target sequence, so folding is binder-only. Structures, sequences and scores have no biological meaning.
 
 Run the same interface without credentials:
 
@@ -90,9 +89,9 @@ For the interface regression check, install `.[demo,dev]` and run `pytest -q`. P
   folding) and turns their outputs into one ranked, traceable report.
 - **Simulator by default.** `SimulatedBioNeMo` returns deterministic, well-formed outputs for every step, so
   the whole pipeline, the ranking logic and the report are covered by offline tests and a key-free demo.
-- **Real backend behind one flag.** `--real-bio` switches to the live NIM client, which handles the async
-  `202` / `nvcf-reqid` polling that the hosted biology NIMs use for long jobs, and works against a self-hosted
-  NIM through `BIONEMO_BASE_URL`.
+- **Real backend behind one flag.** `--real-bio` switches to the live client, which handles the async
+  `202` polling that hosted endpoints use for long jobs, and works against a self-hosted
+  server through `BIONEMO_BASE_URL`.
 - **Scoring.** The composite score is a simple, documented heuristic for ranking a screen; it is stated in the
   report, and every candidate is a hypothesis for wet-lab testing.
 - **Cited reasoning.** The literature brief may only cite abstracts that were actually retrieved;
@@ -117,10 +116,10 @@ top candidates with their confidence and scores.
 The simulator is the default. Each real part is opt-in, so you can turn them on one at a time.
 
 ```bash
-cp .env.example .env            # set NVIDIA_API_KEY for the reasoning model
+cp .env.example .env            # set the API key for the reasoning model
 
 sci search-lit "PD-L1 binder design"      # real Europe PMC search (network only, no key)
-sci demo --real-lit                        # real literature brief, simulated BioNeMo
+sci demo --real-lit                        # real literature brief, simulated design models
 sci design target.json --real-bio           # requires a real target structure and configured endpoints
 sci design my_target.json --real-bio --real-lit --backbones 8 --seqs 8   # your own target, fully live
 ```
@@ -128,10 +127,10 @@ sci design my_target.json --real-bio --real-lit --backbones 8 --seqs 8   # your 
 **Reasoning model:** `NVIDIA_API_KEY` and an OpenAI-compatible endpoint (`NIM_BASE_URL`, hosted by default).
 `sci models` lists the model IDs your endpoint serves.
 
-**BioNeMo backend for `--real-bio`**, either option:
-- Hosted: a key from build.nvidia.com (`NGC_API_KEY`, or `NVIDIA_API_KEY` if that is unset). The client polls
-  the hosted biology NIMs' async job endpoint.
-- Self-hosted: run the NIM containers and set `BIONEMO_BASE_URL` (Boltz-2, RFdiffusion and ProteinMPNN each run
+**Design-model backend for `--real-bio`**, either option:
+- Hosted: an API key for the hosted endpoint (`NGC_API_KEY`, or `NVIDIA_API_KEY` if that is unset). The client polls
+  the hosted async job endpoint.
+- Self-hosted: run the model containers and set `BIONEMO_BASE_URL` (Boltz-2, RFdiffusion and ProteinMPNN each run
   on their own port; the full pipeline needs a gateway exposing all configured model paths).
 
 > The real backend has not been exercised against live endpoints in this repository. The client follows the
@@ -156,9 +155,9 @@ When no ligand affinity is available, the weights fall back to `0.7 * confidence
 This is a transparent ranking heuristic, not a validated scoring function; the report states this and lists the
 caveats, including that binder-only folding (no target sequence) does not measure binding.
 
-## NeMo Agent Toolkit
+## Optional agent-toolkit integration
 
-The pipeline is registered as a NeMo Agent Toolkit component, so it can be run, profiled and served:
+The pipeline is registered as an agent-toolkit component, so it can be run, profiled and served:
 
 ```bash
 pip install -e ".[nat]"
@@ -169,15 +168,15 @@ nat run --config_file configs/workflow.yml --input "PD-L1 | A1-100/0 50-90 | A50
 
 ```
 src/ai_scientist/
-  bionemo.py     BioNeMo NIM client (Boltz-2, RFdiffusion, ProteinMPNN; async polling) and the simulator
+  bionemo.py     model client (Boltz-2, RFdiffusion, ProteinMPNN; async polling) and the simulator
   literature.py  Europe PMC search (keyless)
   pipeline.py    the agent: brief -> backbones -> sequences -> fold -> rank -> report
   schemas.py     Target, Candidate, ScientistReport
   samples.py     offline demo target
   llm.py, config.py  OpenAI-compatible client with guided JSON; settings
-  nat_plugin/    NeMo Agent Toolkit component
+  nat_plugin/    agent-toolkit component
   cli.py         `sci`
-tests/           offline tests (simulated LLM and BioNeMo), deterministic
+tests/           offline tests (simulated LLM and design models), deterministic
 ```
 
 > **Design note.** The small OpenAI-compatible client (`llm.py`) and settings (`config.py`) are intentionally vendored rather than shared as a package, so each example is self-contained and runs with a single `pip install`. The same module appears in the sibling projects by design. `bionemo.py` is the same BioNeMo client that powers [mcp-bionemo](https://github.com/AnhDuongVo/mcp-bionemo), vendored here for the same reason.

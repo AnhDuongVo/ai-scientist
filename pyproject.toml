@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ai-scientist"
 version = "0.2.0"
-description = "Literature-informed protein binder design: an agent that orchestrates NVIDIA BioNeMo NIMs (RFdiffusion, ProteinMPNN, Boltz-2) into a ranked, cited report."
+description = "Literature-informed protein binder design: an agent that orchestrates protein-design models (RFdiffusion, ProteinMPNN, Boltz-2) into a ranked, cited report."
 readme = "README.md"
 requires-python = ">=3.11,<3.14"
 license = { text = "Apache-2.0" }
